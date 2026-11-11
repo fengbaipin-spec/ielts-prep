@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>雅思备考</title>
+<meta name="description" content="雅思 8 分备考：学术词汇和话题词、同义替换、听音写词、听读错题本、大作文范文和计时写作、口语练习，可以离线使用。">
+<meta name="theme-color" content="#f1f3f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#10141c" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400..700;1,8..60,400..700&family=Instrument+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="app.css">
+<script type="module" src="js/main.js"></script>
+</head>
+<body>
+<main id="view" class="view">
+  <p class="loading">正在加载…</p>
+</main>
+
+<button type="button" class="fab" id="fab" hidden></button>
+
+<div class="player" id="player" hidden>
+  <button type="button" class="pl-btn pl-main" id="plPause"></button>
+  <div class="pl-text"><b id="plNow"></b><span id="plSub"></span></div>
+  <button type="button" class="pl-chip" id="plEx" hidden>例句</button>
+  <button type="button" class="pl-chip pl-rate" id="plRate" aria-label="切换语速"></button>
+  <button type="button" class="pl-btn" id="plNext" aria-label="下一个"></button>
+  <button type="button" class="pl-btn" id="plStop" aria-label="停止"></button>
+</div>
+
+<nav class="tabbar" id="tabbar" aria-label="主菜单">
+  <a href="#learn" data-tab="learn">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15.5" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4 9.5h16M8.5 3v3.5M15.5 3v3.5M9 15l2 2 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <span>学习</span>
+  </a>
+  <a href="#dict" data-tab="dict">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 3.5H18a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H6.5A2.5 2.5 0 0 1 4 18V6a2.5 2.5 0 0 1 2.5-2.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M4 18a2.5 2.5 0 0 1 2.5-2.5H19M9 8h6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    <span>词汇</span>
+  </a>
+  <a href="#writing" data-tab="writing">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3.5h7.5L19 8v12a.5.5 0 0 1-.5.5h-11.5A1 1 0 0 1 6 19.5v-15a1 1 0 0 1 1-1z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M14.5 3.5V8H19M9 12.5h6.5M9 16h6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <span>写作</span>
+  </a>
+  <a href="#speaking" data-tab="speaking">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5.5h14a1.5 1.5 0 0 1 1.5 1.5v8a1.5 1.5 0 0 1-1.5 1.5h-7l-4.5 3.5v-3.5H5A1.5 1.5 0 0 1 3.5 15V7A1.5 1.5 0 0 1 5 5.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M8 10h8M8 13h5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    <span>口语</span>
+  </a>
+  <a href="#settings" data-tab="settings">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h9M17 7h3M4 17h3M11 17h9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="15" cy="7" r="2.2" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="9" cy="17" r="2.2" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+    <span>设置</span>
+  </a>
+</nav>
+
+<div class="sheet-back" id="sheetBack" hidden></div>
+<section class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" hidden>
+  <div class="sheet-head">
+    <h2 id="sheetTitle"></h2>
+    <button type="button" class="iconbtn" id="sheetClose" aria-label="关闭"></button>
+  </div>
+  <div class="sheet-body" id="sheetBody"></div>
+</section>
+
+<div class="banner" id="banner" hidden><span id="bannerText"></span><button type="button" id="bannerBtn"></button></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
