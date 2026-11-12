@@ -32,8 +32,9 @@ vocab.volumes.forEach(V => {
   else lastLevel = rank;
   perLevel[V.level] = (perLevel[V.level] || 0) + V.words.length;
   for (const w of V.words) {
-    // the synonyms and the word family may be empty
-    const ok = Array.isArray(w) && w.length === 10 && w.every((x, i) => typeof x === "string" && (i === 7 || i === 8 || x.trim() !== ""));
+    // the synonyms and the word family may be empty; an 11th field (collocations or usage) is optional
+    const ok = Array.isArray(w) && (w.length === 10 || w.length === 11) &&
+      w.every((x, i) => typeof x === "string" && (i === 7 || i === 8 || x.trim() !== ""));
     if (!ok) { errors.push(`${V.name}: malformed entry ${JSON.stringify(w).slice(0, 80)}`); continue; }
     if (!/^\/.+\/$/.test(w[1])) errors.push(`${w[0]}: IPA should be written /like this/`);
     if (!V.tags.includes(w[9])) errors.push(`${V.name} ${w[0]}: tag ${w[9]} is not in the volume's tag list`);

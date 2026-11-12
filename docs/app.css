@@ -449,8 +449,10 @@ body.playing .fab{display:none}
 .ipa{font-family:"Doulos SIL","Charis SIL","Lucida Sans Unicode","Segoe UI",var(--f-body);font-size:.92rem;color:var(--muted)}
 .pos{font-size:.76rem;font-style:italic;color:var(--muted)}
 .en.def{font-size:.86rem;line-height:1.4;padding:4px 8px}
-.syn,.fam,.wi-syn{display:flex;align-items:baseline;flex-wrap:wrap;gap:2px 8px;margin:2px 0 0;font-size:.88rem;line-height:1.45}
+.syn,.fam,.wi-syn{display:flex;align-items:baseline;gap:2px 8px;margin:2px 0 0;font-size:.88rem;line-height:1.45}
 .syn .lbl,.fam .lbl,.wi-syn .lbl{flex:none;font-size:.7rem;letter-spacing:.06em;color:var(--muted);font-weight:600}
+/* a long line wraps beside its label instead of dropping below it */
+.syn>span:last-child,.fam>span:last-child,.wi-syn>span:last-child{flex:1;min-width:0}
 .syn span:last-child{color:var(--accent);font-weight:500}
 .fam span:last-child{color:var(--muted)}
 .quiz .entry:not(.shown) :is(.zh,.en,.syn,.fam,.exzh){filter:blur(6px);user-select:none}

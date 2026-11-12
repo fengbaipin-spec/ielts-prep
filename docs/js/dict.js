@@ -13,7 +13,7 @@ const LEVEL_NOTES = {
   阅读: "雅思阅读常考的学科，带同义词，配合同义替换练习。",
   听力: "听力四个部分的常见场景，重在拼写；学过的词会自动进入听音写词。",
   AWL: "阅读和写作都用得上的学术词，带词族，练词形变化。",
-  写作: "大作文常考话题的词。",
+  写作: "小作文的趋势、流程和地图用语，大作文的论证表达和常考话题词，都带搭配。",
   口语: "口语里地道的说法和短语动词。"
 };
 export const levelShort = L => LEVEL_SHORT[L] || L;
@@ -34,7 +34,8 @@ export function setVocab(data) {
     V.first = ALL.length;
     V.count = V.words.length;
     for (const w of V.words) {
-      const entry = { i: ALL.length, v: V.v, hw: w[0], ipa: w[1], pos: w[2], zh: w[3], def: w[4], ex: w[5], exZh: w[6], syn: w[7], fam: w[8], tag: w[9] };
+      const entry = { i: ALL.length, v: V.v, hw: w[0], ipa: w[1], pos: w[2], zh: w[3], def: w[4], ex: w[5], exZh: w[6], syn: w[7], fam: w[8], tag: w[9],
+        note: w[10] || "", nl: V.noteLabel || "备注" };   // the 11th field: collocations (写作) or usage (口语)
       ALL.push(entry);
       HEAD.set(entry.hw, entry);
     }
@@ -51,7 +52,7 @@ const isOpen = i => settings.exOpen !== flip.has(i);
 const low = s => s.toLowerCase();
 const searchIndex = () => INDEX || (INDEX = ALL.map(w => ({
   head: low(w.hw),
-  meaning: low([w.zh, w.def, w.syn, w.fam].join(" ")),
+  meaning: low([w.zh, w.def, w.syn, w.fam, w.note].join(" ")),
   example: low([w.ex, w.exZh].join(" "))
 })));
 // headword matches first, then meanings and synonyms, then words that only appear in an example
@@ -63,6 +64,10 @@ function rank(x, q) {
   return -1;
 }
 export const synList = w => w.syn.split(",").map(s => s.trim()).filter(Boolean);
+// the collocations or usage line under an entry; English notes are marked as English for the voice and the font
+export const noteHTML = w => (w.note
+  ? `<div class="fam"><span class="lbl">${esc(w.nl)}</span><span${/[一-鿿]/.test(w.note) ? "" : ' lang="en"'}>${esc(w.note)}</span></div>`
+  : "");
 
 /* ---------- one entry ---------- */
 export function entryHTML(i, showVol, showTag) {
@@ -76,6 +81,7 @@ export function entryHTML(i, showVol, showTag) {
       <button type="button" class="en def" data-act="d" data-say="d:${i}" lang="en">${esc(w.def)}${ICON.spk}</button>
       ${w.syn ? `<div class="syn"><span class="lbl">同义</span><span lang="en">${synList(w).map(esc).join(" · ")}</span></div>` : ""}
       ${w.fam ? `<div class="fam"><span class="lbl">词族</span><span lang="en">${esc(w.fam)}</span></div>` : ""}
+      ${noteHTML(w)}
       <div class="meta">
         <button type="button" class="exbtn" data-act="ex" aria-expanded="${open}">例句${ICON.down}</button>
         ${where ? `<span class="tagl">${esc(where)}</span>` : ""}
