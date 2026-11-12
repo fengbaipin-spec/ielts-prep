@@ -3,7 +3,7 @@ import { $, ICON, toast, setFab, closeSheet, nav, BAR_HIDES_BELOW } from "./util
 import { settings, saveSettings } from "./store.js";
 import { initVoices, player, onPlayer, togglePause, skip, stopList } from "./speech.js";
 import { initPwa } from "./pwa.js";
-import { setVocab, renderDict, renderFavs } from "./dict.js";
+import { setVocab, setEtymology, renderDict, renderFavs } from "./dict.js";
 import { renderLearn, renderStudy } from "./learn.js";
 import { renderReview } from "./review.js";
 import { renderSpell } from "./spelling.js";
@@ -121,9 +121,12 @@ async function boot() {
     return r.json();
   });
   try {
-    const [vocab, para, writing, speaking] = await Promise.all(
-      ["vocab", "paraphrase", "writing", "speaking"].map(name => load(`data/${name}.json`)));
+    // the etymologies are extra: without them the app still works
+    const [vocab, para, writing, speaking, etym] = await Promise.all([
+      ...["vocab", "paraphrase", "writing", "speaking"].map(name => load(`data/${name}.json`)),
+      load("data/etymology.json").catch(() => null)]);
     setVocab(vocab);
+    setEtymology(etym);
     setParaphrases(para);
     setWriting(writing);
     setSpeaking(speaking);

@@ -43,6 +43,16 @@ vocab.volumes.forEach(V => {
   }
 });
 
+// etymology: headword → where the word comes from, in Chinese with the roots; only words that have a useful one
+const etym = json("data/etymology.json").etym;
+const etymPerLevel = {};
+for (const [hw, t] of Object.entries(etym)) {
+  if (!heads.has(hw)) { errors.push(`etymology for ${hw}, which is not in the vocabulary`); continue; }
+  if (!str(t) || t !== t.trim() || !/[一-鿿]/.test(t)) errors.push(`etymology of ${hw}: empty, spaces or no Chinese`);
+  const L = vocab.volumes.find(V => V.name === heads.get(hw)).level;
+  etymPerLevel[L] = (etymPerLevel[L] || 0) + 1;
+}
+
 // paraphrase groups: words that can stand for each other in a question and a passage
 const groups = json("data/paraphrase.json").groups;
 const groupKeys = new Set();
@@ -124,6 +134,7 @@ fs.writeFileSync(path.join(docs, "sw.js"), sw);
 
 const kb = files.reduce((n, f) => n + fs.statSync(path.join(docs, f)).size, 0) / 1024;
 console.log(`${vocab.volumes.length} volumes, ${heads.size} words (${Object.entries(perLevel).map(([L, n]) => `${L} ${n}`).join(", ")}), ` +
+  `${Object.keys(etym).length} etymologies (${Object.entries(etymPerLevel).map(([L, n]) => `${L} ${n}`).join(", ")}), ` +
   `${groups.length} paraphrase groups, ${tasks.length} essays, ` +
   `${speaking.part1.length} Part 1 topics, ${speaking.part2.length} Part 2 cards`);
 console.log(`version ${version}: ${assets.length} files cached for offline use, ${kb.toFixed(0)} KB`);

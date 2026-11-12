@@ -2,7 +2,7 @@
 import { $, esc, ICON, nav, openSheet, closeSheet } from "./util.js";
 import { settings, saveSettings } from "./store.js";
 import { speakOne } from "./speech.js";
-import { words, volumes, volume, levels, levelShort, byHead, volumeSheet, synList, noteHTML } from "./dict.js";
+import { words, volumes, volume, levels, levelShort, byHead, volumeSheet, synList, noteHTML, etymHTML } from "./dict.js";
 import * as rec from "./srs.js";
 import { tapWords, showWord, hintOnce } from "./wordinfo.js";
 
@@ -148,7 +148,7 @@ export function cardHTML(w, label, zhFirst) {
       <div class="meta"><button type="button" class="en def" data-s="def" lang="en">${esc(w.def)}${ICON.spk}</button></div>
       ${w.syn ? `<div class="syn"><span class="lbl">同义</span><span lang="en">${synList(w).map(esc).join(" · ")}</span></div>` : ""}
       ${w.fam ? `<div class="fam"><span class="lbl">词族</span><span lang="en">${esc(w.fam)}</span></div>` : ""}
-      ${noteHTML(w)}
+      ${noteHTML(w)}${etymHTML(w)}
       <div class="ex">
         <div class="exs" lang="en">${tapWords(w.ex)}<button type="button" class="exspk" data-s="ex" aria-label="朗读例句">${ICON.spk}</button></div>
         <div class="exzh">${esc(w.exZh)}</div>

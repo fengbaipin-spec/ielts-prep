@@ -35,7 +35,7 @@ export function setVocab(data) {
     V.count = V.words.length;
     for (const w of V.words) {
       const entry = { i: ALL.length, v: V.v, hw: w[0], ipa: w[1], pos: w[2], zh: w[3], def: w[4], ex: w[5], exZh: w[6], syn: w[7], fam: w[8], tag: w[9],
-        note: w[10] || "", nl: V.noteLabel || "备注" };   // the 11th field: collocations (写作) or usage (口语)
+        note: w[10] || "", nl: V.noteLabel || "备注", ety: "" };   // the 11th field: collocations (写作) or usage (口语)
       ALL.push(entry);
       HEAD.set(entry.hw, entry);
     }
@@ -48,12 +48,18 @@ export const byHead = hw => HEAD.get(hw);
 export const clearFlips = () => flip.clear();
 export const levels = () => [...new Set(VOLS.map(V => V.level))];
 export const volume = v => VBYID.get(v);
+// where a word comes from, by headword (data/etymology.json); words without a useful one have none
+export function setEtymology(data) {
+  const E = (data && data.etym) || {};
+  for (const w of ALL) w.ety = E[w.hw] || "";
+  INDEX = null;
+}
 const isOpen = i => settings.exOpen !== flip.has(i);
 const low = s => s.toLowerCase();
 const searchIndex = () => INDEX || (INDEX = ALL.map(w => ({
   head: low(w.hw),
   meaning: low([w.zh, w.def, w.syn, w.fam, w.note].join(" ")),
-  example: low([w.ex, w.exZh].join(" "))
+  example: low([w.ex, w.exZh, w.ety].join(" "))   // roots too: searching "spect" finds inspect, prospect…
 })));
 // headword matches first, then meanings and synonyms, then words that only appear in an example
 function rank(x, q) {
@@ -68,6 +74,7 @@ export const synList = w => w.syn.split(",").map(s => s.trim()).filter(Boolean);
 export const noteHTML = w => (w.note
   ? `<div class="fam"><span class="lbl">${esc(w.nl)}</span><span${/[一-鿿]/.test(w.note) ? "" : ' lang="en"'}>${esc(w.note)}</span></div>`
   : "");
+export const etymHTML = w => (w.ety ? `<div class="fam ety"><span class="lbl">词源</span><span>${esc(w.ety)}</span></div>` : "");
 
 /* ---------- one entry ---------- */
 export function entryHTML(i, showVol, showTag) {
@@ -81,7 +88,7 @@ export function entryHTML(i, showVol, showTag) {
       <button type="button" class="en def" data-act="d" data-say="d:${i}" lang="en">${esc(w.def)}${ICON.spk}</button>
       ${w.syn ? `<div class="syn"><span class="lbl">同义</span><span lang="en">${synList(w).map(esc).join(" · ")}</span></div>` : ""}
       ${w.fam ? `<div class="fam"><span class="lbl">词族</span><span lang="en">${esc(w.fam)}</span></div>` : ""}
-      ${noteHTML(w)}
+      ${noteHTML(w)}${etymHTML(w)}
       <div class="meta">
         <button type="button" class="exbtn" data-act="ex" aria-expanded="${open}">例句${ICON.down}</button>
         ${where ? `<span class="tagl">${esc(where)}</span>` : ""}
