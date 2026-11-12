@@ -148,8 +148,9 @@ body.playing .view{padding-bottom:calc(var(--nav-h) + var(--player-h) + var(--sa
 .vitem small{grid-column:1/-1;font-size:.8rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .vitem[aria-current="true"]{background:var(--accent-soft)}
 .vitem[aria-current="true"] b{color:var(--accent)}
-.vkinds{position:sticky;top:0;z-index:1;background:var(--surface);padding:6px 0 8px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
-.vkinds::-webkit-scrollbar{display:none}
+.vkinds{position:sticky;top:0;z-index:1;background:var(--surface);padding:6px 0 8px}
+/* the five kinds fit on one line on a 375px phone; narrower screens wrap */
+.vkinds .chip{padding:5px 9px}
 .vkinds + .vgroup{margin-top:6px}
 .vnote{margin:0 0 6px;font-size:.84rem;color:var(--muted);line-height:1.5}
 
