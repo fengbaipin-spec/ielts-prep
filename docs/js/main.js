@@ -7,6 +7,7 @@ import { setVocab, renderDict, renderFavs } from "./dict.js";
 import { renderLearn, renderStudy } from "./learn.js";
 import { renderReview } from "./review.js";
 import { renderSpell } from "./spelling.js";
+import { renderForms } from "./forms.js";
 import { setParaphrases, renderPara } from "./paraphrase.js";
 import { renderMistakes } from "./mistakes.js";
 import { setWriting, renderWriting, renderEssay, renderWrite } from "./writing.js";
@@ -21,6 +22,7 @@ const ROUTES = {
   study: [renderStudy, "learn"],
   review: [renderReview, "learn"],
   spell: [renderSpell, "learn"],
+  forms: [renderForms, "learn"],
   para: [renderPara, "learn"],
   mistakes: [renderMistakes, "learn"],
   dict: [renderDict, "dict"],
@@ -34,7 +36,7 @@ const ROUTES = {
   settings: [renderSettings, "settings"]
 };
 // screens you go into from a tab and leave with a close or back button; they always start at the top
-const FLOWS = new Set(["study", "review", "spell", "para", "mistakes", "favs", "essay", "write", "p1", "p2"]);
+const FLOWS = new Set(["study", "review", "spell", "forms", "para", "mistakes", "favs", "essay", "write", "p1", "p2"]);
 const scrollMemo = {};
 
 function show() {

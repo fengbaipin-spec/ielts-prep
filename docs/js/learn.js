@@ -59,6 +59,7 @@ export function renderLearn(view) {
         <a class="pcard" href="#para"><b>同义替换</b><span>认出题目和原文里换了说法的词</span></a>
         <a class="pcard" href="#spell"><b>听音写词</b><span>单词拼写、数字、日期、地址</span></a>
         <a class="pcard" href="#mistakes"><b>听读错题本</b><span>做剑桥真题时记下错题和分数</span></a>
+        <a class="pcard wide" href="#forms"><b>词形填空</b><span>例句里挖掉一个词，写出正确的词形：复数、过去式、名词或副词</span></a>
       </div>
       <section class="group">
         <h2>进度 · 已学 ${rec.learnedCount()} 个词，已掌握 ${rec.masteredCount()} 个</h2>

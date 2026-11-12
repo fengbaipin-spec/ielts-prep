@@ -460,6 +460,13 @@ body.playing .fab{display:none}
 
 /* drills */
 .drill-in{display:flex;flex-direction:column;gap:14px}
+.fsent{margin:0;font-family:var(--f-display);font-size:1.2rem;line-height:1.75}
+.fsent.small{font-size:1.05rem;line-height:1.7}
+.fgap{display:inline-block;min-width:4.5em;border-bottom:2px solid var(--accent);margin:0 3px;line-height:1.2}
+.fsent mark{background:var(--accent-soft);color:var(--accent);padding:0 3px;border-radius:4px;font-weight:600}
+.fbase{margin:0;font-size:.95rem}
+.fbase b{font-family:var(--f-display);font-size:1.1rem}
+.fbase .pos{margin:0 6px 0 4px;color:var(--muted);font-style:italic}
 .spell-ans{width:100%;height:52px;padding:0 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface);font-family:var(--f-display);font-size:1.3rem;color:var(--ink)}
 .spell-ans:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
 .spell-ans[readonly]{color:var(--muted)}

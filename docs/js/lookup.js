@@ -7,7 +7,12 @@ const low = s => s.toLowerCase().replace(/’/g, "'");
 
 // irregular forms of the verbs in the word list
 const IRREGULAR = { sought: "seek", spent: "spend", brought: "bring", grew: "grow", grown: "grow", rose: "rise", risen: "rise",
-  fell: "fall", fallen: "fall", made: "make", led: "lead", chose: "choose", chosen: "choose", children: "child", women: "woman", men: "man" };
+  fell: "fall", fallen: "fall", made: "make", led: "lead", chose: "choose", chosen: "choose", children: "child", women: "woman", men: "man",
+  undertook: "undertake", undertaken: "undertake", underwent: "undergo", undergone: "undergo", oversaw: "oversee", overseen: "oversee",
+  withstood: "withstand", dug: "dig", sown: "sow", took: "take", taken: "take", broke: "break", broken: "break", held: "hold",
+  paid: "pay", sold: "sell", bought: "buy", built: "build", kept: "keep", sent: "send", told: "tell", thought: "think",
+  understood: "understand", won: "win", wrote: "write", written: "write", drew: "draw", drawn: "draw", fled: "flee",
+  hid: "hide", hidden: "hide", forgot: "forget", forgotten: "forget", began: "begin", begun: "begin", ran: "run", spoke: "speak", spoken: "speak" };
 
 // the forms a word could come from; each candidate is only a guess, the word list decides
 export function lemmas(t) {
