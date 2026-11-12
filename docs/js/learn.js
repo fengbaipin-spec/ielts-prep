@@ -1,8 +1,8 @@
-// The 学习 tab: today's plan, the study session (new words and reviews), the practice cards and progress by volume.
+// The 学习 tab: today's plan, the study session (new words and reviews), the practice cards and progress by kind of word.
 import { $, esc, ICON, nav, openSheet, closeSheet } from "./util.js";
 import { settings, saveSettings } from "./store.js";
 import { speakOne } from "./speech.js";
-import { words, volumes, byHead, volumeSheet, synList } from "./dict.js";
+import { words, volumes, volume, levels, levelShort, byHead, volumeSheet, synList } from "./dict.js";
 import * as rec from "./srs.js";
 import { tapWords, showWord, hintOnce } from "./wordinfo.js";
 
@@ -18,7 +18,8 @@ export function setNewPerDay(n) {
   return settings.newPerDay;
 }
 
-const fromVolume = () => (volumes()[settings.newFrom - 1] ? settings.newFrom : 1);
+// new words come from the chosen volume (or the first one) on, in the order shown, and go round after the last
+const fromVolume = () => volume(settings.newFrom) || volumes()[0];
 const newLeft = () => Math.max(0, settings.newPerDay - rec.doneToday()[0]);
 const leave = () => (nav.prev === "learn" ? history.back() : location.replace("#learn"));
 // days left until the exam date chosen in settings
@@ -32,7 +33,7 @@ export function daysToExam() {
 /* ---------- hub ---------- */
 export function renderLearn(view) {
   const due = rec.dueWords().filter(hw => byHead(hw)).length;
-  const fresh = rec.freshWords(words(), fromVolume(), newLeft()).length;
+  const fresh = rec.freshWords(words(), fromVolume().first, newLeft()).length;
   const done = rec.doneToday(), streak = rec.streak(), left = daysToExam();
   const date = new Date().toLocaleDateString("zh-CN", { month: "long", day: "numeric", weekday: "short" });
   view.innerHTML = `
@@ -51,7 +52,7 @@ export function renderLearn(view) {
           ? `<button type="button" class="bigbtn" id="startStudy">${ICON.play}${done[0] + done[1] ? "继续今天的学习" : "开始今天的学习"}</button>`
           : `<p class="donetext">${settings.newPerDay ? "今天的复习和新词都完成了。" : "今天的复习都完成了，新词已暂停。"}</p>
              <button type="button" class="bigbtn soft" id="startMore">再学 ${EXTRA} 个新词</button>`}
-        <p class="note">新词来自 <button type="button" class="linkbtn" id="pickFrom">${volumes()[fromVolume() - 1].name}${ICON.down}</button>，<button type="button" class="linkbtn" id="pickPerDay">${settings.newPerDay ? `每天 ${settings.newPerDay} 个` : "已暂停新词"}${ICON.down}</button>，收藏的词优先。记得的词会隔 1、3、7、14、30 天再出现。</p>
+        <p class="note">新词来自 <button type="button" class="linkbtn" id="pickFrom">${esc(fromVolume().name)}${ICON.down}</button>，<button type="button" class="linkbtn" id="pickPerDay">${settings.newPerDay ? `每天 ${settings.newPerDay} 个` : "已暂停新词"}${ICON.down}</button>，收藏的词优先。记得的词会隔 1、3、7、14、30 天再出现。</p>
       </section>
       <div class="pcards">
         <a class="pcard" href="#review"><b>随时复习</b><span>不用等到期，自己挑一组词翻卡</span></a>
@@ -101,26 +102,31 @@ function pickPerDay(view) {
   $("pdInput").addEventListener("keydown", e => { if (e.key === "Enter") typed(); });
 }
 
+// one bar for each kind of word (阅读, 听力, 学术, 写作, 口语), adding up its volumes
 function progressRows() {
   const all = words();
-  return volumes().map(V => {
-    let learned = 0, mastered = 0;
-    for (let i = V.first; i < V.first + V.count; i++) {
-      const s = rec.stageOf(all[i].hw);
-      if (s >= 0) learned++;
-      if (s >= rec.MASTERED) mastered++;
+  return levels().map(L => {
+    let total = 0, learned = 0, mastered = 0;
+    for (const V of volumes()) {
+      if (V.level !== L) continue;
+      total += V.count;
+      for (let i = V.first; i < V.first + V.count; i++) {
+        const s = rec.stageOf(all[i].hw);
+        if (s >= 0) learned++;
+        if (s >= rec.MASTERED) mastered++;
+      }
     }
-    const pct = n => `${Math.round((n / V.count) * 100)}%`;
-    return `<div class="vprog"><span class="vp-name">${esc(V.name.replace("话题词：", ""))}</span>
+    const pct = n => `${Math.round((n / total) * 100)}%`;
+    return `<div class="vprog"><span class="vp-name">${esc(levelShort(L))}</span>
       <span class="vp-bar"><i class="l" style="width:${pct(learned)}"></i><i class="m" style="width:${pct(mastered)}"></i></span>
-      <span class="vp-n">${learned}/${V.count}</span></div>`;
+      <span class="vp-n">${learned}/${total}</span></div>`;
   }).join("");
 }
 
 function pickFrom(view) {
   const all = words();
   const learned = V => { let n = 0; for (let i = V.first; i < V.first + V.count; i++) if (rec.known(all[i].hw)) n++; return n; };
-  volumeSheet("新词从哪一册开始", fromVolume(), V => `已学 ${learned(V)}/${V.count}`, v => {
+  volumeSheet("新词从哪一册开始", fromVolume().v, V => `已学 ${learned(V)}/${V.count}`, v => {
     settings.newFrom = v;
     saveSettings();
     closeSheet();
@@ -133,7 +139,7 @@ export function cardHTML(w, label, zhFirst) {
   const word = `<button type="button" class="w big" data-s="w" lang="en">${esc(w.hw)}${ICON.spk}</button>
     <div class="ipa-row"><span class="ipa">${esc(w.ipa)}</span><span class="pos">${esc(w.pos)}</span></div>`;
   return `
-    <p class="eyebrow">${label} · ${esc(volumes()[w.v - 1].name)} · ${esc(w.tag)}</p>
+    <p class="eyebrow">${label} · ${esc(volume(w.v).name)} · ${esc(w.tag)}</p>
     ${zhFirst ? `<div class="zh cue">${esc(w.zh)}</div>` : word}
     <button type="button" class="peek" data-go="show" id="peek">${zhFirst ? "先想一想英文怎么说，再点这里看答案" : "先想一想它的意思，再点这里看答案"}</button>
     <div class="answer" id="answer" hidden>
@@ -176,7 +182,7 @@ function newSession(extra) {
       if (w) items.push({ kind: "review", w });
     }
   }
-  for (const w of rec.freshWords(words(), fromVolume(), extra == null ? newLeft() : extra)) items.push({ kind: "new", w });
+  for (const w of rec.freshWords(words(), fromVolume().first, extra == null ? newLeft() : extra)) items.push({ kind: "new", w });
   return { items, pos: 0, shown: false, again: new Set(), counts: { fresh: 0, known: 0, review: 0, forgot: 0 } };
 }
 

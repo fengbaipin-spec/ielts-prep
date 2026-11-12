@@ -15,13 +15,25 @@ const pairs = (list, where) => {
 };
 
 // vocabulary: [word, IPA, part of speech, 中文, definition, example, example 中文, synonyms, word family, tag]
+// A volume's number is an id that never changes, because settings point at it. The order of the volumes in the file
+// is the order they are shown and studied in, grouped by kind in this order:
+const LEVELS = ["阅读", "听力", "AWL", "写作", "口语"];
 const vocab = json("data/vocab.json");
-const heads = new Map();
-vocab.volumes.forEach((V, k) => {
-  if (V.v !== k + 1) errors.push(`volume ${k + 1} is numbered ${V.v}`);
-  if (!str(V.name) || !str(V.level) || !Array.isArray(V.tags) || !V.tags.length) errors.push(`volume ${V.v}: name, level or tags missing`);
+const heads = new Map(), ids = new Set(), names = new Set(), perLevel = {};
+let lastLevel = 0;
+vocab.volumes.forEach(V => {
+  if (!Number.isInteger(V.v) || V.v < 1 || ids.has(V.v)) errors.push(`volume ${V.name}: number ${V.v} is missing or used twice`);
+  ids.add(V.v);
+  if (!str(V.name) || names.has(V.name) || !Array.isArray(V.tags) || !V.tags.length) errors.push(`volume ${V.v}: name missing or repeated, or no tags`);
+  names.add(V.name);
+  const rank = LEVELS.indexOf(V.level);
+  if (rank < 0) errors.push(`volume ${V.v}: unknown kind ${V.level}`);
+  else if (rank < lastLevel) errors.push(`volume ${V.v} ${V.name}: out of order, the kinds go ${LEVELS.join(", ")}`);
+  else lastLevel = rank;
+  perLevel[V.level] = (perLevel[V.level] || 0) + V.words.length;
   for (const w of V.words) {
-    const ok = Array.isArray(w) && w.length === 10 && w.every((x, i) => typeof x === "string" && (i === 8 || x.trim() !== ""));
+    // the synonyms and the word family may be empty
+    const ok = Array.isArray(w) && w.length === 10 && w.every((x, i) => typeof x === "string" && (i === 7 || i === 8 || x.trim() !== ""));
     if (!ok) { errors.push(`${V.name}: malformed entry ${JSON.stringify(w).slice(0, 80)}`); continue; }
     if (!/^\/.+\/$/.test(w[1])) errors.push(`${w[0]}: IPA should be written /like this/`);
     if (!V.tags.includes(w[9])) errors.push(`${V.name} ${w[0]}: tag ${w[9]} is not in the volume's tag list`);
@@ -110,6 +122,7 @@ const sw = fs.readFileSync(path.join(__dirname, "sw-template.js"), "utf8")
 fs.writeFileSync(path.join(docs, "sw.js"), sw);
 
 const kb = files.reduce((n, f) => n + fs.statSync(path.join(docs, f)).size, 0) / 1024;
-console.log(`${vocab.volumes.length} volumes, ${heads.size} words, ${groups.length} paraphrase groups, ${tasks.length} essays, ` +
+console.log(`${vocab.volumes.length} volumes, ${heads.size} words (${Object.entries(perLevel).map(([L, n]) => `${L} ${n}`).join(", ")}), ` +
+  `${groups.length} paraphrase groups, ${tasks.length} essays, ` +
   `${speaking.part1.length} Part 1 topics, ${speaking.part2.length} Part 2 cards`);
 console.log(`version ${version}: ${assets.length} files cached for offline use, ${kb.toFixed(0)} KB`);

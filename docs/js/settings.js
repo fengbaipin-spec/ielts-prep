@@ -3,7 +3,7 @@ import { $, esc, toast } from "./util.js";
 import { settings, saveSettings, stars, saveStars, paraMiss } from "./store.js";
 import { speech, voicesFor, chooseVoice, onVoices, speakOne, accentVoices } from "./speech.js";
 import { pwa, onPwa, promptInstall, checkForUpdate } from "./pwa.js";
-import { wordCount, clearFlips } from "./dict.js";
+import { wordCount, clearFlips, levels, LEVEL_NAMES } from "./dict.js";
 import { learnedCount, masteredCount, exportRecords, importRecords } from "./srs.js";
 import { setNewPerDay, MAX_NEW, daysToExam } from "./learn.js";
 import { canRecognize } from "./listen.js";
@@ -98,7 +98,7 @@ export function renderSettings(view) {
 
       <section class="group about">
         <h2>说明</h2>
-        <p>词汇 ${wordCount()} 个（学术词表和雅思话题词），同义替换、大作文范文和口语参考回答都是为这个 App 原创的练习材料，不是官方真题。整套模考请用剑桥雅思真题书，做完把成绩和错题记在“听读错题本”里。</p>
+        <p>词汇 ${wordCount()} 个（${levels().map(L => LEVEL_NAMES[L] || L).join("、")}），同义替换、大作文范文和口语参考回答都是为这个 App 原创的练习材料，不是官方真题。整套模考请用剑桥雅思真题书，做完把成绩和错题记在“听读错题本”里。</p>
         <p>范文和参考回答按 8 分的标准来写，只是参考写法，不是考官评过分的答卷。</p>
         <p>发音用的是手机自带的语音，和考试录音里的真人发音会有差别。</p>
       </section>

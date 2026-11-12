@@ -1,5 +1,5 @@
 // Starts the app: loads the data, routes between the five tabs and wires the shared player bar.
-import { $, ICON, toast, setFab, closeSheet, nav } from "./util.js";
+import { $, ICON, toast, setFab, closeSheet, nav, BAR_HIDES_BELOW } from "./util.js";
 import { settings, saveSettings } from "./store.js";
 import { initVoices, player, onPlayer, togglePause, skip, stopList } from "./speech.js";
 import { initPwa } from "./pwa.js";
@@ -68,7 +68,7 @@ addEventListener("scroll", () => {
   const y = scrollY;
   const bar = view.querySelector(".vbar");
   if (bar && !(document.activeElement && document.activeElement.matches("input, textarea"))) {
-    if (y > lastY + 8 && y > 140) bar.classList.add("hide");
+    if (y > lastY + 8 && y > BAR_HIDES_BELOW) bar.classList.add("hide");
     else if (y < lastY - 8 || y < 60) bar.classList.remove("hide");
   }
   lastY = y;

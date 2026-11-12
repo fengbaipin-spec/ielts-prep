@@ -18,12 +18,20 @@ export const store = {
 
 export const DEFAULTS = {
   rate: 0.9, voice: null, exOpen: false, playEx: false,
-  newPerDay: 10, newFrom: 1, autoSay: true, examType: "A", examDate: "", recognize: false,
-  reviewSrc: "recent", reviewDays: 7, reviewVol: 1, reviewWhole: false, reviewDir: "en", reviewN: 20,
+  // volume numbers; null means the first volume shown (newFrom) or the one new words come from (reviewVol)
+  newPerDay: 10, newFrom: null, autoSay: true, examType: "A", examDate: "", recognize: false,
+  reviewSrc: "recent", reviewDays: 7, reviewVol: null, reviewWhole: false, reviewDir: "en", reviewN: 20,
   spellMode: "words", spellSrc: "learned", accents: true
 };
 export const settings = Object.assign({}, DEFAULTS, store.get("settings", {}));
 export const saveSettings = () => store.set("settings", settings);
+
+// The reading volumes were added in front of the first six. Volume numbers stayed the same, but newFrom 1 used to be
+// the default, "from the first volume"; it keeps that meaning, so new words now start with the reading volumes.
+if (store.get("vocabLayout", 1) < 2) {
+  if (settings.newFrom === 1) { settings.newFrom = null; saveSettings(); }
+  store.set("vocabLayout", 2);
+}
 
 // starred words, by headword
 export const stars = new Set(store.get("stars", []));

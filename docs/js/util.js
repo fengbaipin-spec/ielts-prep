@@ -15,6 +15,8 @@ export function shuffle(list) {
 
 // where the router has been, so a view can tell whether "back" returns to the list it came from
 export const nav = { prev: "", current: "" };
+// the header slides away when scrolling down past this many pixels
+export const BAR_HIDES_BELOW = 140;
 
 const svg = (body, cls) => `<svg${cls ? ` class="${cls}"` : ""} viewBox="0 0 24 24" aria-hidden="true">${body}</svg>`;
 const line = d => `<path d="${d}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;

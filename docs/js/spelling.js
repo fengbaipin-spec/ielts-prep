@@ -3,7 +3,7 @@
 import { $, esc, ICON, nav, shuffle } from "./util.js";
 import { settings, saveSettings, stars } from "./store.js";
 import { speakOne, accentVoices, onVoices } from "./speech.js";
-import { words, volumes } from "./dict.js";
+import { words, volumes, volume } from "./dict.js";
 import * as rec from "./srs.js";
 
 const ROUND = 10;
@@ -12,11 +12,11 @@ let round = null;   // { mode, items, pos, results, checked }
 const leave = () => (nav.prev === "learn" ? history.back() : location.replace("#learn"));
 
 function wordSources() {
-  const all = words(), V = volumes()[settings.newFrom - 1] || volumes()[0];
+  const all = words(), V = volume(settings.newFrom) || volumes()[0];
   return [
     { id: "learned", name: "已学的词", list: all.filter(w => rec.known(w.hw)) },
     { id: "stars", name: "收藏", list: all.filter(w => stars.has(w.hw)) },
-    { id: "volume", name: V.name.replace("话题词：", ""), list: all.slice(V.first, V.first + V.count) }
+    { id: "volume", name: V.name, list: all.slice(V.first, V.first + V.count) }
   ];
 }
 
@@ -31,6 +31,8 @@ const MONTHS = ["January", "February", "March", "April", "May", "June", "July", 
 const DIGIT = ["oh", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"];
 const ordinal = n => n + (n % 100 >= 11 && n % 100 <= 13 ? "th" : ["th", "st", "nd", "rd"][n % 10] || "th");
 const squash = s => s.toLowerCase().replace(/[\s.,'’-]/g, "");
+// a typed word against the headword: capitals and extra spaces don't count, and "the" in "the Milky Way" may be left out
+const plain = s => s.trim().toLowerCase().replace(/’/g, "'").replace(/\s+/g, " ").replace(/^the /, "");
 // digits read the British way, in groups, with "double" for a repeated digit
 function sayDigits(groups) {
   return groups.map(g => {
@@ -172,8 +174,8 @@ function start() {
     const pool = shuffle(wordSources().find(s => s.id === settings.spellSrc).list.slice());
     pool.sort((a, b) => rec.missCount(b.hw) - rec.missCount(a.hw));
     items = shuffle(pool.slice(0, ROUND)).map(w => ({ kind: "单词", w, say: w.hw, answer: w.hw, voice: voice(),
-      ok: t => t.trim().toLowerCase().replace(/’/g, "'") === w.hw.toLowerCase(),
-      near: t => squash(t) === squash(w.hw) }));
+      ok: t => plain(t) === plain(w.hw),
+      near: t => squash(plain(t)) === squash(plain(w.hw)) }));
   }
   round = { items, pos: 0, results: [] };
   drawItem();

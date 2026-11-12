@@ -4,7 +4,7 @@
 import { $, esc, ICON, nav, shuffle, closeSheet } from "./util.js";
 import { settings, saveSettings, stars } from "./store.js";
 import { speakOne } from "./speech.js";
-import { words, volumes, volumeSheet } from "./dict.js";
+import { words, volumes, volume as volumeById, volumeSheet } from "./dict.js";
 import * as rec from "./srs.js";
 import { hintOnce } from "./wordinfo.js";
 import { cardHTML, cardTap } from "./learn.js";
@@ -15,7 +15,8 @@ const SIZES = [10, 20, 50, 0];   // 0: all of them
 let ses = null;   // a session: { items: [{ w, again }], pos, shown, first: Map(headword → remembered) }
 
 const leave = () => (nav.prev === "learn" ? history.back() : location.replace("#learn"));
-const volume = () => volumes()[settings.reviewVol - 1] || volumes()[0];
+// the volume 按册 goes through: the one chosen here, otherwise the one new words come from
+const volume = () => volumeById(settings.reviewVol) || volumeById(settings.newFrom) || volumes()[0];
 // forgotten in a review, or misspelt in 听音写词
 const trouble = w => rec.lapsesOf(w.hw) + rec.missCount(w.hw);
 

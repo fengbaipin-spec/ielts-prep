@@ -1,6 +1,6 @@
 // Service worker: keeps a copy of the whole app so it opens without a network.
 // tools/build.js fills in VERSION and ASSETS and writes the result to docs/sw.js.
-const VERSION = "fa298c57c5";
+const VERSION = "e517e0189f";
 const ASSETS = [
   "./",
   "app.css",

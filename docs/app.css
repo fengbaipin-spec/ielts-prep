@@ -148,6 +148,10 @@ body.playing .view{padding-bottom:calc(var(--nav-h) + var(--player-h) + var(--sa
 .vitem small{grid-column:1/-1;font-size:.8rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .vitem[aria-current="true"]{background:var(--accent-soft)}
 .vitem[aria-current="true"] b{color:var(--accent)}
+.vkinds{position:sticky;top:0;z-index:1;background:var(--surface);padding:6px 0 8px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+.vkinds::-webkit-scrollbar{display:none}
+.vkinds + .vgroup{margin-top:6px}
+.vnote{margin:0 0 6px;font-size:.84rem;color:var(--muted);line-height:1.5}
 
 /* round play button, player bar and tab bar */
 .fab{position:fixed;right:calc(var(--gr) + 2px);bottom:calc(var(--nav-h) + var(--safe-b) + 14px);z-index:30;display:inline-flex;align-items:center;gap:8px;height:48px;padding:0 20px 0 16px;border-radius:999px;background:var(--accent);color:var(--accent-ink);font-weight:600;box-shadow:var(--shadow)}

@@ -71,14 +71,15 @@ export function dueWords() {
   const t = today();
   return [...srs].filter(([, r]) => r[1] <= t).sort((a, b) => a[1][1] - b[1][1] || a[1][0] - b[1][0]).map(([it]) => it);
 }
-// starred words not learned yet come first, then the dictionary in order from the chosen volume
-export function freshWords(all, fromVolume, n) {
-  const out = [], taken = new Set();
+// starred words not learned yet come first, then the dictionary in order from the chosen volume's first word (start),
+// going round to the beginning after the last volume
+export function freshWords(all, start, n) {
+  const out = [], taken = new Set(), from = Number.isInteger(start) && start > 0 ? start : 0;
   const take = w => {
     if (out.length < n && !srs.has(w.hw) && !taken.has(w.hw)) { out.push(w); taken.add(w.hw); }
   };
   for (const w of all) if (stars.has(w.hw)) take(w);
-  for (const w of all) if (w.v >= fromVolume) take(w);
+  for (let k = 0; k < all.length && out.length < n; k++) take(all[(from + k) % all.length]);
   return out;
 }
 

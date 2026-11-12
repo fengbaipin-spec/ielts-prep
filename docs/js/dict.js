@@ -1,14 +1,26 @@
-// The vocabulary (academic word list and topic words, in volumes) and the starred list, which share one entry layout.
-import { $, esc, ICON, nav, setFab, openSheet, closeSheet } from "./util.js";
+// The vocabulary and the starred list, which share one entry layout. The words come in volumes of five kinds.
+// A volume's number is an id that never changes (settings point at it); the order in vocab.json is the order the
+// volumes are shown and studied in, grouped by kind.
+import { $, esc, ICON, nav, setFab, openSheet, closeSheet, BAR_HIDES_BELOW } from "./util.js";
 import { store, settings, saveSettings, stars, saveStars } from "./store.js";
 import { speech, onVoices, speakOne, playList, stopList, player } from "./speech.js";
 import { pwa, onPwa, promptInstall } from "./pwa.js";
 import { tapWords, showWord, hintOnce } from "./wordinfo.js";
 
-export const LEVEL_NAMES = { AWL: "学术词表（AWL）", 话题: "雅思话题词" };
+export const LEVEL_NAMES = { 阅读: "阅读学科词", 听力: "听力场景词", AWL: "学术词表（AWL）", 写作: "写作词", 口语: "口语词" };
+const LEVEL_SHORT = { 阅读: "阅读词", 听力: "听力词", AWL: "学术词", 写作: "写作词", 口语: "口语词" };
+const LEVEL_NOTES = {
+  阅读: "雅思阅读常考的学科，带同义词，配合同义替换练习。",
+  听力: "听力常见场景，重在拼写。",
+  AWL: "阅读和写作都用得上的学术词，带词族，练词形变化。",
+  写作: "大作文常考话题的词。",
+  口语: "口语里地道的说法和短语动词。"
+};
+export const levelShort = L => LEVEL_SHORT[L] || L;
 const PAGE = 120;   // search results shown at a time
 
 let VOLS = [];
+const VBYID = new Map();   // volume number → volume
 const ALL = [];
 const HEAD = new Map();   // headword → entry
 let INDEX = null;
@@ -18,6 +30,7 @@ let quiz = false;         // starred list self-test: meanings stay blurred until
 export function setVocab(data) {
   VOLS = data.volumes;
   for (const V of VOLS) {
+    VBYID.set(V.v, V);
     V.first = ALL.length;
     V.count = V.words.length;
     for (const w of V.words) {
@@ -33,7 +46,7 @@ export const volumes = () => VOLS;
 export const byHead = hw => HEAD.get(hw);
 export const clearFlips = () => flip.clear();
 export const levels = () => [...new Set(VOLS.map(V => V.level))];
-const volume = v => VOLS[v - 1];
+export const volume = v => VBYID.get(v);
 const isOpen = i => settings.exOpen !== flip.has(i);
 const low = s => s.toLowerCase();
 const searchIndex = () => INDEX || (INDEX = ALL.map(w => ({
@@ -166,12 +179,13 @@ const ds = { ready: false, v: 1, tag: "全部", query: "", searching: false, lim
 
 function initState() {
   const s = store.get("dict", {});
-  ds.v = volume(s.v) ? s.v : 1;
+  ds.v = volume(s.v) ? s.v : VOLS[0].v;
   ds.tag = s.tag && volume(ds.v).tags.includes(s.tag) ? s.tag : "全部";
-  ds.restore = Number.isInteger(s.i) ? s.i : null;
+  ds.restore = s.hw && HEAD.has(s.hw) ? HEAD.get(s.hw).i : null;
   ds.ready = true;
 }
-const saveDict = i => store.set("dict", { v: ds.v, tag: ds.tag, i });
+// the place is kept by headword, which stays right when volumes are added in front
+const saveDict = i => store.set("dict", { v: ds.v, tag: ds.tag, hw: i == null ? null : ALL[i].hw });
 const searchingText = () => ds.searching && ds.query.trim() !== "";
 
 function dictItems() {
@@ -323,13 +337,28 @@ function drawNotices() {
 onVoices(drawNotices);
 onPwa(drawNotices);
 
-// the volume list, shared with the 学习 tab's choices
+// the volume list, shared with the 学习 tab's choices: pick the kind of word first, then the volume
 export function volumeSheet(title, current, note, onPick) {
-  const html = levels().map(L => `<p class="vgroup">${LEVEL_NAMES[L] || L}</p>` +
-    VOLS.filter(V => V.level === L).map(V => `<button type="button" class="vitem" data-v="${V.v}" aria-current="${V.v === current}">
-        <b>${V.name}</b><span class="n">${note(V)}</span>
-        <small>${V.tags.map(esc).join(" · ")}</small></button>`).join("")).join("");
-  openSheet(title, html, e => {
+  let level = (volume(current) || VOLS[0]).level;
+  const body = () => {
+    const vols = VOLS.filter(V => V.level === level), n = vols.reduce((k, V) => k + V.count, 0);
+    const kinds = levels().length < 2 ? "" : `<div class="chiprow vkinds" role="group" aria-label="词的类别">${levels().map(L =>
+      `<button type="button" class="chip" data-level="${esc(L)}" aria-pressed="${L === level}">${esc(levelShort(L))}</button>`).join("")}</div>`;
+    return `${kinds}<p class="vgroup">${esc(LEVEL_NAMES[level] || level)} · ${vols.length} 册 ${n} 词</p>
+      ${LEVEL_NOTES[level] ? `<p class="vnote">${LEVEL_NOTES[level]}</p>` : ""}` +
+      vols.map(V => `<button type="button" class="vitem" data-v="${V.v}" aria-current="${V.v === current}">
+        <b>${esc(V.name)}</b><span class="n">${note(V)}</span>
+        <small>${V.tags.map(esc).join(" · ")}</small></button>`).join("");
+  };
+  openSheet(title, body(), e => {
+    const k = e.target.closest("[data-level]");
+    if (k) {
+      if (k.dataset.level === level) return;
+      level = k.dataset.level;
+      $("sheetBody").innerHTML = body();
+      $("sheetBody").scrollTop = 0;
+      return;
+    }
     const b = e.target.closest("[data-v]");
     if (b) onPick(Number(b.dataset.v));
   });
@@ -351,7 +380,9 @@ function pickVolume() {
   });
 }
 
-// on the first visit after a restart, go back to the word you were reading
+// on the first visit after a restart, go back to the word you were reading. Far down the list the header slides
+// away as the page scrolls there, so the word goes to the very top; near the top it goes just below the header.
+// Either way it is the first word showing, so the place saved next time is the same word.
 function restorePosition() {
   if (ds.restore == null) return false;
   const i = ds.restore;
@@ -359,7 +390,8 @@ function restorePosition() {
   const li = document.querySelector(`.entry[data-i="${i}"]`);
   if (!li) return false;
   const bar = document.querySelector(".vbar");
-  window.scrollTo(0, li.getBoundingClientRect().top + scrollY - (bar ? bar.offsetHeight : 0));
+  const y = li.getBoundingClientRect().top + scrollY, below = y - (bar ? bar.offsetHeight : 0);
+  window.scrollTo(0, below > BAR_HIDES_BELOW ? y : Math.max(0, below));
   return true;
 }
 let saveTimer = 0;
