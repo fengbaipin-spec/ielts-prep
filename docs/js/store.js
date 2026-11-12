@@ -21,7 +21,7 @@ export const DEFAULTS = {
   // volume numbers; null means the first volume shown (newFrom) or the one new words come from (reviewVol)
   newPerDay: 10, newFrom: null, autoSay: true, examType: "A", examDate: "", recognize: false,
   reviewSrc: "recent", reviewDays: 7, reviewVol: null, reviewWhole: false, reviewDir: "en", reviewN: 20,
-  spellMode: "words", spellSrc: "learned", accents: true
+  spellMode: "words", spellSrc: "listen", accents: true
 };
 export const settings = Object.assign({}, DEFAULTS, store.get("settings", {}));
 export const saveSettings = () => store.set("settings", settings);

@@ -14,6 +14,8 @@ const leave = () => (nav.prev === "learn" ? history.back() : location.replace("#
 function wordSources() {
   const all = words(), V = volume(settings.newFrom) || volumes()[0];
   return [
+    // listening words come here by themselves once learned: in the exam their spelling has to be exact
+    { id: "listen", name: "学过的听力词", list: all.filter(w => rec.known(w.hw) && volume(w.v).level === "听力") },
     { id: "learned", name: "已学的词", list: all.filter(w => rec.known(w.hw)) },
     { id: "stars", name: "收藏", list: all.filter(w => stars.has(w.hw)) },
     { id: "volume", name: V.name, list: all.slice(V.first, V.first + V.count) }
@@ -126,7 +128,7 @@ onVoices(() => { if (!round && $("xBody") && $("xSetup")) drawSetup(); });
 
 function drawSetup() {
   const src = wordSources(), mode = settings.spellMode;
-  if (!src.some(s => s.id === settings.spellSrc && s.list.length)) settings.spellSrc = (src.find(s => s.list.length >= 5) || src[2]).id;
+  if (!src.some(s => s.id === settings.spellSrc && s.list.length)) settings.spellSrc = (src.find(s => s.list.length >= 5) || src.find(s => s.id === "volume")).id;
   const accents = accentVoices();
   $("xCount").textContent = "";
   $("xBar").style.width = "0";
@@ -144,7 +146,7 @@ function drawSetup() {
     </div>` : ""}
     <label class="switch"><span>轮换口音<small>${accents.length > 1 ? `手机上有：${accents.map(a => a.name).join("、")}` : "手机上只找到一种英语声音"}</small></span><input type="checkbox" id="xAcc"${settings.accents ? " checked" : ""}${accents.length > 1 ? "" : " disabled"}></label>
     <button type="button" class="bigbtn" id="xStart">${ICON.play}开始</button>
-    <p class="note">${mode === "words" ? "写错过的词会更常出现，写对一次后恢复正常；它们也会出现在随时复习的“容易忘的”里。" : "日期可以写 23 March 或 23/3，时间写 7:15，价格写 12.50。"}</p></div>`;
+    <p class="note">${mode === "words" ? "学过的听力场景词会自动加进“学过的听力词”。写错过的词会更常出现，写对一次后恢复正常；它们也会出现在随时复习的“容易忘的”里。" : "日期可以写 23 March 或 23/3，时间写 7:15，价格写 12.50。"}</p></div>`;
   $("xMode").onclick = e => {
     const b = e.target.closest("[data-mode]");
     if (!b) return;
